@@ -8,7 +8,7 @@ export default defineConfig({
   base: "/ziwei-plus",
   // 如果需要，也可以配置构建输出目录
   build: {
-    outDir: "dist",
+    outDir: "docs",
     assetsDir: "assets",
     // 确保资源路径正确
     assetsInlineLimit: 4096,
