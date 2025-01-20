@@ -8,7 +8,9 @@ import {
   StarOutlined,
   SearchOutlined,
   BulbOutlined,
-  WechatOutlined
+  WechatOutlined,
+  MenuOutlined,
+  CloseOutlined
 } from '@ant-design/icons-vue'
 
 const router = useRouter()
@@ -142,6 +144,20 @@ const verifyPassword = () => {
 if (localStorage.getItem('ziweiVerified') === 'true') {
   showMask.value = false
 }
+
+// 移动端菜单控制
+const isMenuOpen = ref(false)
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value
+  document.body.classList.toggle('menu-open', isMenuOpen.value)
+}
+
+// 路由变化时关闭菜单
+router.afterEach(() => {
+  isMenuOpen.value = false
+  document.body.classList.remove('menu-open')
+})
 </script>
 
 <template>
@@ -149,13 +165,13 @@ if (localStorage.getItem('ziweiVerified') === 'true') {
     <!-- 密码验证遮罩层 -->
     <div v-if="showMask" class="mask-overlay">
       <div class="mask-content">
-        <h2 class="mask-title">欢迎访问紫微星耀篇</h2>
+        <h2 class="mask-title text-2xl md:text-3xl">欢迎访问紫微星耀篇</h2>
         <p class="mask-description">请输入访问密码</p>
         <p class="mask-contact">
           <WechatOutlined class="contact-icon" />
           <span>获取密码请添加微信：wh18329723317</span>
         </p>
-        <div class="password-input">
+        <div class="password-input flex-col md:flex-row gap-4 md:gap-2">
           <a-input-password
             v-model:value="password"
             placeholder="请输入密码"
@@ -168,8 +184,24 @@ if (localStorage.getItem('ziweiVerified') === 'true') {
       </div>
     </div>
 
+    <!-- 移动端菜单按钮 -->
+    <button 
+      class="md:hidden fixed top-4 left-4 z-40 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 shadow-md"
+      @click="toggleMenu"
+    >
+      <MenuOutlined v-if="!isMenuOpen" class="text-xl" />
+      <CloseOutlined v-else class="text-xl" />
+    </button>
+
     <!-- 侧边菜单 -->
-    <div class="w-64 bg-gray-50 border-r border-gray-200 p-4">
+    <div 
+      :class="[
+        'transition-transform duration-300 ease-in-out',
+        'fixed md:static left-0 top-0 h-full z-30 overflow-y-auto',
+        'w-64 bg-gray-50 border-r border-gray-200 p-4',
+        isMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      ]"
+    >
       <nav class="space-y-2">
         <router-link to="/" class="nav-item">
           <span>首页</span>
@@ -190,9 +222,16 @@ if (localStorage.getItem('ziweiVerified') === 'true') {
     </div>
 
     <!-- 主内容区 -->
-    <div class="flex-1 p-8 bg-gray-100">
+    <div class="flex-1 p-4 md:p-8 bg-gray-100 md:ml-0 overflow-y-auto">
       <router-view></router-view>
     </div>
+
+    <!-- 移动端菜单遮罩 -->
+    <div 
+      v-if="isMenuOpen" 
+      class="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+      @click="toggleMenu"
+    ></div>
   </div>
 </template>
 
@@ -265,5 +304,37 @@ if (localStorage.getItem('ziweiVerified') === 'true') {
 
 :deep(.ant-input-affix-wrapper) {
   @apply flex-1;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .app {
+    padding-top: 1rem;
+  }
+  
+  .nav-item {
+    @apply px-3 py-3;
+  }
+
+  .mask-content {
+    @apply mx-4 p-4 md:p-8;
+  }
+
+  .password-input {
+    @apply w-full;
+  }
+
+  :deep(.ant-input-affix-wrapper) {
+    @apply w-full;
+  }
+
+  :deep(.ant-btn) {
+    @apply w-full md:w-auto;
+  }
+}
+
+/* 防止页面滚动当菜单打开时 */
+:deep(body.menu-open) {
+  @apply overflow-hidden;
 }
 </style>
